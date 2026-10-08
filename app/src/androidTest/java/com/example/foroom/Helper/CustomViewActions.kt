@@ -1,4 +1,4 @@
-package com.example.foroom.Helper
+package com.example.foroom.helper
 
 import android.app.Instrumentation
 import android.graphics.drawable.ColorDrawable

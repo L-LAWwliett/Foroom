@@ -1,4 +1,4 @@
-package com.example.foroom.Helper
+package com.example.foroom.helper
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
