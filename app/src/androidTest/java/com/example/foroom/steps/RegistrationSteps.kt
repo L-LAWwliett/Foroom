@@ -1,35 +1,43 @@
 package com.example.foroom.steps
 
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import com.example.foroom.Helper.UiWait
+import com.example.foroom.helper.UiWait
 import com.example.foroom.pages.RegistrationPage
 
-class RegistrationSteps {
-    private val registrationPage = RegistrationPage()
-
-    fun checkRegistrationScreenDisplayed() {
-        UiWait.displayed(registrationPage.repeatPasswordField)
-        UiWait.displayed(registrationPage.usernameField)
-        UiWait.displayed(registrationPage.passwordField)
-        UiWait.displayed(registrationPage.avatarList)
-        UiWait.displayed(registrationPage.signUpButton)
+class RegistrationSteps(private val page: RegistrationPage = RegistrationPage()) {
+    fun checkRegistrationScreenDisplayed() = apply {
+        listOf(page.repeatPasswordField, page.usernameField, page.passwordField,
+            page.avatarList, page.signUpButton).forEach {
+            UiWait.displayed(it)
+            onView(it).check(matches(isDisplayed()))
+        }
     }
-
-    fun register(username: String, password: String) {
-        checkRegistrationScreenDisplayed()
-        registrationPage.enterUsername(username)
-        registrationPage.enterPassword(password)
-        registrationPage.enterRepeatPassword(password)
-        registrationPage.selectSecondAvatar()
-        registrationPage.tapSignUp()
-        checkRegistrationSuccessful()
+    fun enterUsername(username: String) = apply {
+        UiWait.displayed(page.usernameField)
+        onView(page.usernameField).perform(replaceText(username), closeSoftKeyboard())
     }
-
-    fun checkRegistrationSuccessful() {
-        UiWait.displayed(registrationPage.homeNavigationBar)
-        UiWait.displayed(registrationPage.homeContainer)
-        onView(registrationPage.homeNavigationBar).check(matches(isDisplayed()))
+    fun enterPassword(password: String) = apply {
+        UiWait.displayed(page.passwordField)
+        onView(page.passwordField).perform(replaceText(password), closeSoftKeyboard())
+    }
+    fun enterRepeatPassword(password: String) = apply {
+        UiWait.displayed(page.repeatPasswordField)
+        onView(page.repeatPasswordField).perform(replaceText(password), closeSoftKeyboard())
+    }
+    fun selectSecondAvatar() = apply {
+        UiWait.enabled(page.secondAvatar)
+        onView(page.secondAvatar).perform(click())
+    }
+    fun tapSignUp() = apply {
+        UiWait.enabled(page.signUpButton)
+        onView(page.signUpButton).perform(click())
+    }
+    fun checkRegistrationSuccessful() = apply {
+        UiWait.displayed(page.homeNavigationBar)
+        UiWait.displayed(page.homeContainer)
+        onView(page.homeNavigationBar).check(matches(isDisplayed()))
     }
 }

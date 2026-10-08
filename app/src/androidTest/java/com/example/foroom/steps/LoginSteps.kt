@@ -1,46 +1,43 @@
 package com.example.foroom.steps
 
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import com.example.foroom.Helper.UiWait
+import androidx.test.espresso.matcher.ViewMatchers.*
+import com.example.foroom.helper.UiWait
 import com.example.foroom.pages.LoginPage
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.isEmptyOrNullString
 import org.hamcrest.Matchers.not
 
-class LoginSteps {
-    private val loginPage = LoginPage()
-
-    fun checkLoginScreenDisplayed() {
-        UiWait.displayed(loginPage.loginButton)
-        UiWait.displayed(loginPage.usernameField)
-        UiWait.displayed(loginPage.passwordField)
-        UiWait.displayed(loginPage.signUpButton)
+class LoginSteps(private val page: LoginPage = LoginPage()) {
+    fun checkLoginScreenDisplayed() = apply {
+        listOf(page.loginButton, page.usernameField, page.passwordField, page.signUpButton)
+            .forEach { UiWait.displayed(it); onView(it).check(matches(isDisplayed())) }
     }
-
-    fun login(username: String, password: String) {
-        checkLoginScreenDisplayed()
-        loginPage.enterUsername(username)
-        loginPage.enterPassword(password)
-        UiWait.enabled(loginPage.loginButton)
-        loginPage.tapLogin()
+    fun enterUsername(username: String) = apply {
+        UiWait.displayed(page.usernameField)
+        onView(page.usernameField).perform(replaceText(username), closeSoftKeyboard())
     }
-
-    fun openRegistration() {
-        UiWait.enabled(loginPage.signUpButton)
-        loginPage.tapSignUp()
+    fun enterPassword(password: String) = apply {
+        UiWait.displayed(page.passwordField)
+        onView(page.passwordField).perform(replaceText(password), closeSoftKeyboard())
     }
-
-    fun checkUsernameError() {
-        val error = allOf(loginPage.usernameError, withText(not(isEmptyOrNullString())))
+    fun tapLogin() = apply {
+        UiWait.enabled(page.loginButton)
+        onView(page.loginButton).perform(click())
+    }
+    fun openRegistration() = apply {
+        UiWait.enabled(page.signUpButton)
+        onView(page.signUpButton).perform(click())
+    }
+    fun checkUsernameError() = apply {
+        val error = allOf(page.usernameError, withText(not(isEmptyOrNullString())))
         UiWait.displayed(error)
         onView(error).check(matches(isDisplayed()))
     }
-
-    fun checkPasswordError() {
-        val error = allOf(loginPage.passwordError, withText(not(isEmptyOrNullString())))
+    fun checkPasswordError() = apply {
+        val error = allOf(page.passwordError, withText(not(isEmptyOrNullString())))
         UiWait.displayed(error)
         onView(error).check(matches(isDisplayed()))
     }

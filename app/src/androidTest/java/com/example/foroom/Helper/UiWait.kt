@@ -1,4 +1,4 @@
-package com.example.foroom.Helper
+package com.example.foroom.helper
 
 
 import android.os.SystemClock
@@ -10,6 +10,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.util.TreeIterables
 import org.hamcrest.Matcher
+import com.example.foroom.constants.TestConstants
 
 object UiWait {
 
@@ -24,7 +25,7 @@ object UiWait {
 
     fun until(
         description: String,
-        timeoutMs: Long = 15_000,
+        timeoutMs: Long = TestConstants.UI_TIMEOUT_MS,
         required: Boolean = true,
         condition: (View) -> Boolean
     ): Boolean {
@@ -49,7 +50,7 @@ object UiWait {
                         return
                     }
 
-                    uiController.loopMainThreadForAtLeast(100)
+                    uiController.loopMainThreadForAtLeast(TestConstants.POLL_INTERVAL_MS)
                 } while (SystemClock.uptimeMillis() < deadline)
             }
         })

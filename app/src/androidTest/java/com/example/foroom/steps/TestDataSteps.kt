@@ -2,11 +2,11 @@ package com.example.foroom.steps
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
-import com.alternator.foroom.R
-import com.example.foroom.Helper.UiWait
-import com.example.foroom.pages.ChatsPage
+import com.example.foroom.helper.UiWait
+import com.example.foroom.pages.ConversationPage
+import com.example.foroom.pages.ProfilePage
+import com.example.foroom.constants.TestConstants
 import com.example.foroom.pages.LoginPage
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.isEmptyOrNullString
@@ -14,51 +14,47 @@ import org.hamcrest.Matchers.not
 
 object TestDataSteps {
 
-    const val USER_A = "user_a"
-    const val USER_B = "user_b"
-    const val PASSWORD = "TestPass123!"
-
-    const val JOHN_CHAT = "johnWeek"
-    const val OWN_CHAT = "Akaki Zakariadze"
-    const val SHARED_CHAT = "something"
-
     private val loginPage = LoginPage()
     private val loginSteps = LoginSteps()
     private val registrationSteps = RegistrationSteps()
 
-    fun prepare() {
-        ensureAccount(USER_A)
-        ensureAccount(USER_B)
-        signInAs(USER_A)
+    fun prepare() = apply {
+        ensureAccount(TestConstants.USER_A)
+        ensureAccount(TestConstants.USER_B)
+        signInAs(TestConstants.USER_A)
 
-        listOf(JOHN_CHAT, OWN_CHAT, SHARED_CHAT).forEach { title ->
-            ChatsPage.searchChat(title)
+        TestConstants.CHAT_TITLES.forEach { title ->
+            ChatSteps.disableListAnimations().enterSearch(title)
 
-            if (!ChatsPage.chatExists(title)) {
-                CreateChatSteps.createChat(title)
-                ConversationPageSteps.closeCreatedChat()
+            if (!ChatSteps.chatExists(title)) {
+                CreateChatSteps.openCreateChat()
+                    .enterChatName(title)
+                    .selectSecondAvatar()
+                    .tapCreateChat()
+                ConversationSteps.checkOpened(title).closeChat()
+                ChatSteps.openChats()
             }
         }
 
-        ChatsPage.searchChat("")
+        ChatSteps.disableListAnimations().enterSearch("")
     }
 
-    fun signInAs(username: String) {
+    fun signInAs(username: String) = apply {
         goToLoginScreen()
         loginSteps.checkLoginScreenDisplayed()
-        loginSteps.login(username, PASSWORD)
+        loginSteps.enterUsername(username).enterPassword(TestConstants.PASSWORD).tapLogin()
 
         check(awaitLoginResult() == LoginResult.SUCCESS) {
             "Could not log in as $username. Check the test password."
         }
 
-        ChatsPage.openChats()
+        ChatSteps.openChats()
     }
 
     private fun ensureAccount(username: String) {
         goToLoginScreen()
         loginSteps.checkLoginScreenDisplayed()
-        loginSteps.login(username, PASSWORD)
+        loginSteps.enterUsername(username).enterPassword(TestConstants.PASSWORD).tapLogin()
 
         when (awaitLoginResult()) {
             LoginResult.SUCCESS -> Unit
@@ -66,7 +62,11 @@ object TestDataSteps {
             LoginResult.MISSING_ACCOUNT -> {
                 loginSteps.openRegistration()
                 registrationSteps.checkRegistrationScreenDisplayed()
-                registrationSteps.register(username, PASSWORD)
+                registrationSteps.enterUsername(username)
+                    .enterPassword(TestConstants.PASSWORD)
+                    .enterRepeatPassword(TestConstants.PASSWORD)
+                    .selectSecondAvatar()
+                    .tapSignUp()
                 registrationSteps.checkRegistrationSuccessful()
             }
 
@@ -78,14 +78,14 @@ object TestDataSteps {
             }
         }
 
-        ProfileSteps.signOut()
+        signOutIfNeeded()
     }
 
     private fun goToLoginScreen() {
         UiWait.until("Initial application screen is ready") {
-            UiWait.visible(it, withId(R.id.logInButton)) ||
-                    UiWait.visible(it, withId(R.id.navBar)) ||
-                    UiWait.visible(it, withId(R.id.closeButton))
+            UiWait.visible(it, loginPage.loginButton) ||
+                    UiWait.visible(it, ProfilePage.homeNavigationBar) ||
+                    UiWait.visible(it, ConversationPage.closeButton)
         }
 
         var needsClosing = false
@@ -93,22 +93,34 @@ object TestDataSteps {
         UiWait.until("Inspect current screen") {
             needsClosing = UiWait.visible(
                 it,
-                withId(R.id.closeButton)
+                ConversationPage.closeButton
             )
             true
         }
 
         if (needsClosing) {
-            onView(withId(R.id.closeButton)).perform(click())
+            ConversationSteps.closeChat()
         }
 
         UiWait.until("Login or home screen is ready") {
-            UiWait.visible(it, withId(R.id.logInButton)) ||
-                    UiWait.visible(it, withId(R.id.navBar))
+            UiWait.visible(it, loginPage.loginButton) ||
+                    UiWait.visible(it, ProfilePage.homeNavigationBar)
         }
 
-        ProfileSteps.signOut()
+        signOutIfNeeded()
         loginSteps.checkLoginScreenDisplayed()
+    }
+
+    private fun signOutIfNeeded() {
+        var loggedOut = false
+        UiWait.until("Inspect login screen") {
+            loggedOut = UiWait.visible(it, loginPage.loginButton)
+            true
+        }
+        if (!loggedOut) {
+            ProfileSteps.checkHomeDisplayed().openProfile().tapSignOut()
+            loginSteps.checkLoginScreenDisplayed()
+        }
     }
 
     private fun awaitLoginResult(): LoginResult {
@@ -116,7 +128,7 @@ object TestDataSteps {
 
         val missingAccount = allOf(
             loginPage.usernameError,
-            withText("Username does not exist")
+            withText(TestConstants.MISSING_USERNAME_ERROR)
         )
 
         val usernameError = allOf(
@@ -131,7 +143,7 @@ object TestDataSteps {
 
         UiWait.until("Login succeeds or reports an error") { root ->
             when {
-                UiWait.visible(root, withId(R.id.navBar)) -> {
+                UiWait.visible(root, ProfilePage.homeNavigationBar) -> {
                     result = LoginResult.SUCCESS
                     true
                 }
@@ -158,13 +170,5 @@ object TestDataSteps {
         SUCCESS,
         MISSING_ACCOUNT,
         ERROR
-    }
-}
-
-// Setup calls this after CreateChatSteps opens a new conversation.
-private object ConversationPageSteps {
-    fun closeCreatedChat() {
-        com.example.foroom.pages.ConversationPage.closeChat()
-        ChatsPage.openChats()
     }
 }

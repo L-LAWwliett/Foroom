@@ -1,4 +1,4 @@
-package com.example.foroom.Helper
+package com.example.foroom.helper
 
 import androidx.test.espresso.EspressoException
 

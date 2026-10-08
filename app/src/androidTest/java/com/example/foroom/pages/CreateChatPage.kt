@@ -3,11 +3,6 @@ package com.example.foroom.pages
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.replaceText
-import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -15,7 +10,6 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.alternator.foroom.R
 import com.example.design_system.components.image_chooser.ImageChooserItemView
 import com.example.design_system.components.image_chooser.ImageChooserListView
-import com.example.foroom.Helper.UiWait
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
@@ -30,7 +24,7 @@ object CreateChatPage {
             isDescendantOfA(withId(parentId))
         )
 
-    private val secondAvatar: Matcher<View> =
+    val secondAvatar: Matcher<View> =
         object : TypeSafeMatcher<View>() {
 
             override fun describeTo(description: Description) {
@@ -55,58 +49,7 @@ object CreateChatPage {
             }
         }
 
-    fun openCreateChat() {
-        val navigationButton =
-            withId(R.id.homeNavigationCreateChat)
-
-        UiWait.enabled(navigationButton)
-        onView(navigationButton).perform(click())
-
-        UiWait.displayed(inputInside(R.id.chatNameInput))
-    }
-
-    fun enterChatName(chatName: String) {
-        val nameField = inputInside(R.id.chatNameInput)
-
-        UiWait.displayed(nameField)
-        onView(nameField).perform(
-            replaceText(chatName),
-            closeSoftKeyboard()
-        )
-    }
-
-    fun selectSecondAvatar() {
-        UiWait.enabled(secondAvatar)
-        onView(secondAvatar).perform(click())
-    }
-
-    fun createChat() {
-        val createButton = withId(R.id.createChatButton)
-
-        UiWait.enabled(createButton)
-        onView(createButton).perform(click())
-    }
-
-    fun checkChatCreated(chatName: String) {
-        // This field appears only after the conversation opens.
-        UiWait.displayed(inputInside(R.id.messageInput))
-
-        val chatTitle: Matcher<View> = allOf(
-            withId(DesignR.id.chatNameTextView),
-            withText(chatName),
-            isDescendantOfA(withId(R.id.chatHeaderView))
-        )
-
-        UiWait.displayed(chatTitle)
-        onView(chatTitle).check(matches(isDisplayed()))
-    }
-
-    fun closeChat() {
-        val closeButton = withId(R.id.closeButton)
-
-        UiWait.displayed(closeButton)
-        onView(closeButton).perform(click())
-
-        UiWait.displayed(withId(R.id.navBar))
-    }
+    val navigationButton: Matcher<View> = withId(R.id.homeNavigationCreateChat)
+    val nameField: Matcher<View> = inputInside(R.id.chatNameInput)
+    val createButton: Matcher<View> = withId(R.id.createChatButton)
 }

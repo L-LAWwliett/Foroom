@@ -2,16 +2,11 @@ package com.example.foroom.pages
 
 import android.view.View
 import android.view.ViewGroup
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.alternator.foroom.R
 import com.example.design_system.components.image_chooser.ImageChooserItemView
 import com.example.design_system.components.image_chooser.ImageChooserListView
-import com.example.foroom.Helper.UiWait
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
@@ -50,22 +45,4 @@ class RegistrationPage {
         }
     }
 
-    private fun fill(field: Matcher<View>, text: String) {
-        UiWait.displayed(field)
-        onView(field).perform(replaceText(text), closeSoftKeyboard())
-    }
-
-    fun enterUsername(username: String) = fill(usernameField, username)
-    fun enterPassword(password: String) = fill(passwordField, password)
-    fun enterRepeatPassword(password: String) = fill(repeatPasswordField, password)
-
-    fun selectSecondAvatar() {
-        UiWait.enabled(secondAvatar)
-        onView(secondAvatar).perform(click())
-    }
-
-    fun tapSignUp() {
-        UiWait.enabled(signUpButton)
-        onView(signUpButton).perform(click())
-    }
 }

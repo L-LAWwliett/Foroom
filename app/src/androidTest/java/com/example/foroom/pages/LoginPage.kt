@@ -1,10 +1,6 @@
 package com.example.foroom.pages
 
 import android.view.View
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.alternator.foroom.R
@@ -40,21 +36,4 @@ class LoginPage {
 
 
 
-    fun enterUsername(username: String) {
-        onView(usernameField)
-            .perform(replaceText(username), closeSoftKeyboard())
-    }
-
-    fun enterPassword(password: String) {
-        onView(passwordField)
-            .perform(replaceText(password), closeSoftKeyboard())
-    }
-
-    fun tapLogin() {
-        onView(loginButton).perform(click())
-    }
-
-    fun tapSignUp() {
-        onView(signUpButton).perform(click())
-    }
 }
